@@ -22,12 +22,19 @@ The research investigates how small, carefully crafted modifications in text can
 ├── visualization_scripts.py       # Visualization utilities
 ├── requirements.txt               # Required packages
 └── experiments/                   # Generated experiment results
-    └── TIMESTAMP/                 # Each experiment run
-        ├── config.json            # Experiment configuration
+    └── training/                  # Each experiment run
         ├── models/                # Saved models
         ├── results/               # Evaluation results
+    └── char_testing/                 # Each experiment run
         ├── adversarial_examples/  # Generated adversarial examples
         └── visualizations/        # Result visualizations
+        └── attack_results.json    # attack results
+        └── config.json            # configurations
+    └── word_testing/              # Each experiment run
+        ├── adversarial_examples/  # Generated adversarial examples
+        └── visualizations/        # Result visualizations
+        └── attack_results.json    # attack results
+        └── config.json            # configurations
 ```
 
 ## Installation
@@ -47,31 +54,15 @@ The project can be run in different modes:
 ### Train Baseline Models
 
 ```bash
-python main.py --task train_models --dataset imdb --model_type bert --batch_size 16 --epochs 3
+python main.py --task train_models --dataset imdb --model_type bert --batch_size 8 --epochs 1
 ```
 
 ### Run Adversarial Attacks
-
 ```bash
-python main.py --task run_attacks --dataset imdb --model_type bert --attack_type word --num_examples 100
+python main.py --task run_attacks --dataset imdb --model_type bert --attack_type char --num_examples 10 --checkpoint_path checkpoints/bert_epoch_1.pt
 ```
-
-### Apply Defense Mechanisms
-
 ```bash
-python main.py --task apply_defenses --dataset imdb --model_type bert --defense_type adversarial_training
-```
-
-### Visualize Results
-
-```bash
-python main.py --task visualize_results
-```
-
-### Run Full Pipeline
-
-```bash
-python main.py --task full_pipeline --dataset imdb --model_type bert --attack_type all --defense_type all --num_examples 100 --batch_size 16 --epochs 3
+python main.py --task run_attacks --dataset imdb --model_type bert --attack_type word --num_examples 10 --checkpoint_path checkpoints/bert_epoch_1.pt
 ```
 
 ## Command Line Arguments
@@ -94,33 +85,14 @@ python main.py --task full_pipeline --dataset imdb --model_type bert --attack_ty
 
 1. **Character-level attacks**: Misspellings, character swaps, and visually similar characters
 2. **Word-level attacks**: Synonym replacement, word embedding-based substitutions
-3. **Textfooler**: A state-of-the-art word substitution attack
-4. **DeepWordBug**: Character-level perturbations targeting key tokens
-5. **BERT-Attack**: Contextualized perturbations using BERT embeddings
-
-## Defense Mechanisms
-
-1. **Adversarial Training**: Augment training data with adversarial examples
-2. **Input Sanitization**: Clean and normalize input text to remove adversarial perturbations
-3. **Robust Word Embeddings**: Modify model embeddings to be more robust
-4. **Ensemble Methods**: Combine multiple models to improve robustness
 
 ## Results
 
-Experiment results are saved in the `experiments/TIMESTAMP/` directory:
-
-- `results/`: CSV files with model performance metrics
+Experiment results are saved in the `experiments/attack_type_testing/` directory:
+- `config`: JSON files with configurations
+- `attack_results`: JSON files with model performance metrics
 - `adversarial_examples/`: CSV files with original and perturbed text examples
 - `visualizations/`: PNG files with visualizations of attack success rates, model performance degradation, etc.
-
-## Extending the Project
-
-To extend the project:
-
-1. Add new attack types in `adversarial_attacks.py`
-2. Implement additional defense mechanisms in `defense_mechanisms.py`
-3. Create new visualization functions in `visualization_scripts.py`
-4. Modify `main.py` to incorporate your changes
 
 ## Requirements
 
