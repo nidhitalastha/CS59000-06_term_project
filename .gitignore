@@ -1,0 +1,10 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+experiments/training/models/
+experiments/training/checkpoints/
+experiments/training/model_results.json
+checkpoints/
+*.safetensors
+*.pt

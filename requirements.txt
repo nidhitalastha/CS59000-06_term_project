@@ -1,0 +1,14 @@
+torch>=1.8.0
+transformers>=4.5.0
+datasets>=1.6.0
+textattack>=0.3.0
+openattack>=2.0.0
+scikit-learn>=0.24.0
+matplotlib>=3.4.0
+pandas>=1.2.0
+numpy>=1.20.0
+seaborn>=0.11.0
+autocorrect>=2.5.0
+tensorflow>=2.5.0
+tqdm>=4.60.0
+nltk>=3.6.0

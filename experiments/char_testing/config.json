@@ -1,0 +1,16 @@
+{
+    "task": "run_attacks",
+    "dataset": "imdb",
+    "model_type": "bert",
+    "checkpoint_path": "checkpoints/bert_epoch_1.pt",
+    "attack_type": "char",
+    "num_examples": 10,
+    "batch_size": 16,
+    "epochs": 3,
+    "max_seq_length": 128,
+    "seed": 42,
+    "output_dir": "experiments",
+    "timestamp": "20250326-110658",
+    "experiment_dir": "experiments",
+    "seed_set": true
+}
