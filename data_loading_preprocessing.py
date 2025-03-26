@@ -92,32 +92,6 @@ def preprocess_text(text, remove_stopwords=False):
     
     return text
 
-def prepare_data_for_lstm(data, max_seq_length=256, vocab_size=10000):
-    """
-    Prepare data for LSTM model.
-    Args:
-        data: List of (text, label) tuples
-        max_seq_length: Maximum sequence length
-        vocab_size: Vocabulary size
-    Returns:
-        Tokenized texts, labels, and tokenizer
-    """
-       
-    texts = [item[0] for item in data]
-    labels = [item[1] for item in data]
-    
-    # Create and fit tokenizer
-    tokenizer = Tokenizer(num_words=vocab_size, oov_token="<OOV>")
-    tokenizer.fit_on_texts(texts)
-    
-    # Convert texts to sequences
-    sequences = tokenizer.texts_to_sequences(texts)
-    
-    # Pad sequences
-    padded_sequences = pad_sequences(sequences, maxlen=max_seq_length, padding='post', truncating='post')
-    
-    return np.array(padded_sequences), np.array(labels), tokenizer
-
 def prepare_data_for_bert(data, tokenizer, max_seq_length=128):
     """
     Prepare data for BERT model.

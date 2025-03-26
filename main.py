@@ -99,7 +99,7 @@ def parse_args():
     parser.add_argument("--dataset", type=str, default="imdb", choices=["imdb", "jigsaw", "both"],
                         help="Dataset to use")
     
-    parser.add_argument("--model_type", type=str, default="bert", choices=["lstm", "cnn", "bert", "all"],
+    parser.add_argument("--model_type", type=str, default="bert", choices=["bert"],
                         help="Type of model to train/attack")
     
     parser.add_argument("--checkpoint_path", type=str, default=None,
