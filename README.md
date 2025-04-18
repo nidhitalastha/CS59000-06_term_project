@@ -35,6 +35,16 @@ The research investigates how small, carefully crafted modifications in text can
         └── visualizations/        # Result visualizations
         └── attack_results.json    # attack results
         └── config.json            # configurations
+    └── homoglyph_testing/                  # Each experiment run
+        ├── adversarial_examples/  # Generated adversarial examples
+        └── visualizations/        # Result visualizations
+        └── attack_results.json    # attack results
+        └── config.json            # configurations
+    └── deepwordbug_testing/       # Each experiment run
+        ├── adversarial_examples/  # Generated adversarial examples
+        └── visualizations/        # Result visualizations
+        └── attack_results.json    # attack results
+        └── config.json            # configurations
 ```
 
 ## Installation
