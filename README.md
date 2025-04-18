@@ -54,17 +54,22 @@ The project can be run in different modes:
 ### Train Baseline Models
 
 ```bash
-python main.py --task train_models --dataset imdb --model_type bert --batch_size 8 --epochs 1
+python main.py --task train_models --dataset imdb --model_type bert --batch_size 16 --epochs 3
 ```
 
 ### Run Adversarial Attacks
 ```bash
-python main.py --task run_attacks --dataset imdb --model_type bert --attack_type char --num_examples 10 --checkpoint_path checkpoints/bert_epoch_1.pt
+python main.py --task run_attacks --dataset imdb --model_type bert --attack_type char --num_examples 100 --checkpoint_path checkpoints/bert_epoch_1.pt
 ```
 ```bash
-python main.py --task run_attacks --dataset imdb --model_type bert --attack_type word --num_examples 10 --checkpoint_path checkpoints/bert_epoch_1.pt
+python main.py --task run_attacks --dataset imdb --model_type bert --attack_type word --num_examples 100 --checkpoint_path checkpoints/bert_epoch_1.pt
 ```
-
+```bash
+python main.py --task run_attacks --dataset imdb --model_type bert --attack_type homoglyph --num_examples 100 --checkpoint_path checkpoints/bert_epoch_1.pt
+```
+```bash
+python main.py --task run_attacks --dataset imdb --model_type bert --attack_type deepwordbug --num_examples 1000 --checkpoint_path checkpoints/bert_epoch_1.pt
+```
 ## Command Line Arguments
 
 - `--task`: Task to perform (`train_models`, `run_attacks`, `apply_defenses`, `visualize_results`, `full_pipeline`)
