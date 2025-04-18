@@ -92,7 +92,7 @@ def create_custom_attack(attack_type, model_wrapper):
     
     return attack
 
-def run_adversarial_attack(model, tokenizer, test_data, attack_type='word', num_examples=100):
+def run_adversarial_attack(model, tokenizer, test_data, attack_type='word', num_examples=1000):
     """
     Run adversarial attack on the specified model.
     
@@ -115,6 +115,8 @@ def run_adversarial_attack(model, tokenizer, test_data, attack_type='word', num_
     dataset = Dataset(
     [(text, label) for text, label in limited_test_data]
     )
+
+    print(len(dataset))
     
     # Create attack
     if attack_type == 'textfooler':
@@ -126,8 +128,12 @@ def run_adversarial_attack(model, tokenizer, test_data, attack_type='word', num_
     else:
         attack = create_custom_attack(attack_type, model_wrapper)
     
+    attack_args = textattack.AttackArgs(
+    num_examples=len(dataset),
+)
+
     # Run attack
-    attacker = textattack.Attacker(attack, dataset)
+    attacker = textattack.Attacker(attack, dataset, attack_args)
     results = attacker.attack_dataset()
     
     # Calculate attack success rate

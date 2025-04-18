@@ -113,7 +113,7 @@ def parse_args():
                         choices=["adversarial_training", "input_sanitization", "robust_embeddings", "ensemble", "all"],
                         help="Type of defense mechanism to apply")
     
-    parser.add_argument("--num_examples", type=int, default=100,
+    parser.add_argument("--num_examples", type=int, default=1000,
                         help="Number of examples to use for adversarial attacks")
     
     parser.add_argument("--batch_size", type=int, default=16,
@@ -217,8 +217,8 @@ def train_baseline_models(config):
         # Use a smaller subset for faster training during development
         if config.get("debug", False):
             print("DEBUG MODE: Using smaller dataset")
-            train_data = train_data[:1000]
-            test_data = test_data[:200]
+            train_data = train_data[:20000]
+            test_data = test_data[:10000]
         
         if config["model_type"] in ["bert", "all"]:
             try:
@@ -527,6 +527,8 @@ def main():
                         "test_data": test_data
                     }
                 }
+            
+            print(len(model_results["bert_imdb"]["test_data"]))
             
             if not model_results:
                 print("No previously trained models found. Please run with --task train_models first.")

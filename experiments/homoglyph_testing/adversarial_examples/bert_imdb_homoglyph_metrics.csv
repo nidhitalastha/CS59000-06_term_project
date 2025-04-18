@@ -1,2 +1,2 @@
 model,dataset,attack_type,num_examples,successful_attacks,attack_success_rate
-bert,imdb,char,100,38,38.0
+bert,imdb,homoglyph,100,90,90.0
