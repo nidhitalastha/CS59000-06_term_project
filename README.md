@@ -93,13 +93,15 @@ python main.py --task run_attacks --dataset imdb --model_type bert --attack_type
 
 ## Datasets
 
-1. **IMDB Movie Reviews**: Used for sentiment analysis
-2. **Jigsaw Toxic Comment**: Used for hate speech detection
+ **IMDB Movie Reviews**: Used for sentiment analysis
+
 
 ## Attack Types
 
 1. **Character-level attacks**: Misspellings, character swaps, and visually similar characters
 2. **Word-level attacks**: Synonym replacement, word embedding-based substitutions
+3. **Homoglyph attacks**: exploit the visual similarity between certain characters
+4. **Deepwordbug attacks**: combines a sophisticated scoring function with character-level transformations
 
 ## Results
 
