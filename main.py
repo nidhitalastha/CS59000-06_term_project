@@ -80,7 +80,7 @@ except ImportError as e:
 
 # Import transformers for BERT
 try:
-    from transformers import BertTokenizer, BertForSequenceClassification
+    from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
 except ImportError:
     print("Error: transformers library not found. Please install it with 'pip install transformers'")
     sys.exit(1)
@@ -225,7 +225,7 @@ def train_baseline_models(config):
                 print("\nTraining BERT model")
                 
                 # Initialize tokenizer
-                tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+                tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
                 
                 # Prepare data for BERT
                 print("Preparing data for BERT...")
@@ -478,7 +478,15 @@ def main():
     model_results = {}
     attack_results = {}
     defense_results = {}
-    
+
+    class NpEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, np.integer):
+                return int(obj)
+            if isinstance(obj, np.floating):
+                return float(obj)
+            return super(NpEncoder, self).default(obj)
+
     # Execute requested task
     if config["task"] in ["train_models", "full_pipeline"]:
         try:
@@ -493,9 +501,9 @@ def main():
                         "metrics": value["metrics"],
                         "model_path": f"{training_experiment_dir}/models/{key}"
                     }
-                
+                print(model_results_meta)
                 with open(f"{training_experiment_dir}/model_results.json", "w") as f:
-                    json.dumps(model_results_meta,indent=4)
+                    json.dumps(model_results_meta,indent=4,cls=NpEncoder)
                 
                 print(f"Model results metadata saved to {training_experiment_dir}/model_results.json")
             else:
@@ -510,11 +518,11 @@ def main():
             if config.get("checkpoint_path"):
                 print(f"Loading model from checkpoint: {config['checkpoint_path']}")
                 # Load base model
-                model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
+                model = DistilBertForSequenceClassification.from_pretrained(f"{training_experiment_dir}/models/bert_imdb", num_labels=2)
                 # Load checkpoint
                 model.load_state_dict(torch.load(config['checkpoint_path'], map_location=device))
                 # Load tokenizer
-                tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+                tokenizer = DistilBertTokenizer.from_pretrained(f"{training_experiment_dir}/models/bert_imdb")
                 # Load test data
                 _, test_data = load_imdb_dataset()
                 
@@ -534,10 +542,10 @@ def main():
                 print("No previously trained models found. Please run with --task train_models first.")
                 return
             
-        except FileNotFoundError:
-            print(f"No model_results.json file found in {training_experiment_dir}")
-            print("Please run with --task train_models first.")
-            return
+        # except FileNotFoundError:
+        #     print(f"No model_results.json file found in {training_experiment_dir}")
+        #     print("Please run with --task train_models first.")
+        #     return
         except Exception as e:
             print(f"Error loading models: {e}")
             traceback.print_exc()

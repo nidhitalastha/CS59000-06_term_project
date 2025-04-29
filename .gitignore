@@ -4,7 +4,8 @@ __pycache__/
 *$py.class
 experiments/training/models/
 experiments/training/checkpoints/
-experiments/training/model_results.json
+experiments/training/bert_training/model_results.json
+experiments/training/distil_training/model/
 checkpoints/
 *.safetensors
 *.pt

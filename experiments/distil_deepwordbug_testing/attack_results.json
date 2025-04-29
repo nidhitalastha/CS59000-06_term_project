@@ -1,0 +1,8 @@
+{
+    "bert_imdb_deepwordbug": {
+        "attack_type": "deepwordbug",
+        "attack_success_rate": 64.0,
+        "num_examples": 1000,
+        "successful_attacks": 640
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "bert_imdb_homoglyph": {
+        "attack_type": "homoglyph",
+        "attack_success_rate": 87.6,
+        "num_examples": 1000,
+        "successful_attacks": 876
+    }
+}

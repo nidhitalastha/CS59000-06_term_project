@@ -1,0 +1,2 @@
+model,dataset,accuracy,precision,recall,f1
+bert,imdb,0.8828,0.8832535268935848,0.8828,0.8827653172914673

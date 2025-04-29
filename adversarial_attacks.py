@@ -3,7 +3,7 @@
 import textattack
 import torch
 import pandas as pd
-from textattack.attack_recipes import TextFoolerJin2019, DeepWordBugGao2018, BERTAttackLi2020
+from textattack.attack_recipes import TextFoolerJin2019, DeepWordBugGao2018, BERTAttackLi2020, BAEGarg2019
 from textattack.datasets import Dataset
 from textattack.models.wrappers import PyTorchModelWrapper, HuggingFaceModelWrapper
 from textattack.constraints.pre_transformation import RepeatModification, StopwordModification
@@ -124,7 +124,8 @@ def run_adversarial_attack(model, tokenizer, test_data, attack_type='word', num_
     elif attack_type == 'deepwordbug':
         attack = DeepWordBugGao2018.build(model_wrapper)
     elif attack_type == 'bert-attack':
-        attack = BERTAttackLi2020.build(model_wrapper)
+        # attack = BERTAttackLi2020.build(model_wrapper)
+        attack = BAEGarg2019.build(model_wrapper)
     else:
         attack = create_custom_attack(attack_type, model_wrapper)
     

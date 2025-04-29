@@ -5,7 +5,8 @@ from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import functional as F
-from transformers import BertForSequenceClassification, AdamW, get_linear_schedule_with_warmup
+from torch.optim import AdamW
+from transformers import DistilBertForSequenceClassification, get_linear_schedule_with_warmup
 from sklearn.metrics import classification_report, accuracy_score, precision_recall_fscore_support, confusion_matrix
 import time
 import numpy as np
@@ -38,8 +39,8 @@ def train_bert_model(train_dataloader, val_dataloader, num_labels=2, epochs=4):
         print(f"Memory cached: {torch.cuda.memory_reserved(0) / 1e9:.2f} GB")
     
     # Load pre-trained BERT model
-    model = BertForSequenceClassification.from_pretrained(
-        'bert-base-uncased',
+    model = DistilBertForSequenceClassification.from_pretrained(
+        'distilbert-base-uncased',
         num_labels=num_labels
     )
     model.to(device)
@@ -264,8 +265,8 @@ def test_model_training():
     )
     
     # Initialize tiny BERT model
-    model = BertForSequenceClassification.from_pretrained(
-        'bert-base-uncased',
+    model = DistilBertForSequenceClassification.from_pretrained(
+        'distilbert-base-uncased',
         num_labels=2,
         hidden_dropout_prob=0.1
     )

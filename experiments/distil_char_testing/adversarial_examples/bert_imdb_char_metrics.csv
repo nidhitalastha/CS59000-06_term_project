@@ -1,0 +1,2 @@
+model,dataset,attack_type,num_examples,successful_attacks,attack_success_rate
+bert,imdb,char,1000,560,56.00000000000001

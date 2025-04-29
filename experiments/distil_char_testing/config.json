@@ -1,0 +1,17 @@
+{
+    "task": "run_attacks",
+    "dataset": "imdb",
+    "model_type": "bert",
+    "checkpoint_path": "/kaggle/input/distilbertimdb/transformers/default/1/bert_epoch_3.pt",
+    "attack_type": "char",
+    "defense_type": null,
+    "num_examples": 1000,
+    "batch_size": 16,
+    "epochs": null,
+    "max_seq_length": 128,
+    "seed": 42,
+    "output_dir": "experiments",
+    "timestamp": "20250428-222245",
+    "experiment_dir": "experiments",
+    "seed_set": true
+}
