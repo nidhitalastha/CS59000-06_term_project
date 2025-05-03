@@ -3,9 +3,9 @@
 import textattack
 import torch
 import pandas as pd
-from textattack.attack_recipes import TextFoolerJin2019, DeepWordBugGao2018, BERTAttackLi2020, BAEGarg2019
+from textattack.attack_recipes import TextFoolerJin2019, DeepWordBugGao2018, BAEGarg2019
 from textattack.datasets import Dataset
-from textattack.models.wrappers import PyTorchModelWrapper, HuggingFaceModelWrapper
+from textattack.models.wrappers import PyTorchModelWrapper
 from textattack.constraints.pre_transformation import RepeatModification, StopwordModification
 from textattack.goal_functions import UntargetedClassification
 from textattack.transformations import WordSwapEmbedding, WordSwapHomoglyphSwap, WordSwapNeighboringCharacterSwap
@@ -92,7 +92,7 @@ def create_custom_attack(attack_type, model_wrapper):
     
     return attack
 
-def run_adversarial_attack(model, tokenizer, test_data, attack_type='word', num_examples=1000):
+def run_adversarial_attack(model, tokenizer, test_data, attack_type='deepwordbug', num_examples=1000):
     """
     Run adversarial attack on the specified model.
     

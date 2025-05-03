@@ -9,7 +9,6 @@ from nltk.tokenize import word_tokenize
 from datasets import load_dataset
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset, RandomSampler, SequentialSampler
-from transformers import BertTokenizer
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
@@ -36,40 +35,6 @@ def load_imdb_dataset():
     
     print(f"IMDB dataset loaded: {len(train_data)} training samples, {len(test_data)} test samples")
     return train_data, test_data
-
-def load_jigsaw_dataset(max_samples=25000):
-    """
-    Load the Jigsaw Toxic Comment dataset for hate speech detection.
-    Limit samples to manage computational resources.
-    Returns train and test datasets.
-    """
-    print("Loading Jigsaw Toxic Comment dataset...")
-    try:
-        # Use the correct dataset name
-        dataset = load_dataset("jigsaw_toxicity_pred")
-        
-        # Filter to binary toxicity classification
-        toxicity_threshold = 0.5
-        train_texts = dataset["train"]["comment_text"][:max_samples]
-        train_labels = [1 if toxicity > toxicity_threshold else 0 
-                       for toxicity in dataset["train"]["toxicity"][:max_samples]]
-        
-        # Create train/test split
-        train_texts, test_texts, train_labels, test_labels = train_test_split(
-            train_texts, train_labels, test_size=0.2, random_state=RANDOM_SEED, stratify=train_labels
-        )
-        
-        train_data = list(zip(train_texts, train_labels))
-        test_data = list(zip(test_texts, test_labels))
-        
-        print(f"Jigsaw dataset loaded: {len(train_data)} training samples, {len(test_data)} test samples")
-        return train_data, test_data
-    except Exception as e:
-        print(f"Error loading Jigsaw dataset: {e}")
-        # Handle the error gracefully
-        print("Using a placeholder dataset instead. Please check your internet connection or dataset availability.")
-        # Return a small placeholder dataset
-        return [("This is toxic content", 1), ("This is normal content", 0)], [("More toxic content", 1), ("More normal content", 0)]
 
 def preprocess_text(text, remove_stopwords=False):
     """

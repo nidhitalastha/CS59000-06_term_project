@@ -1,8 +1,0 @@
-{
-    "bert_imdb_char": {
-        "attack_type": "char",
-        "attack_success_rate": 38.0,
-        "num_examples": 100,
-        "successful_attacks": 38
-    }
-}

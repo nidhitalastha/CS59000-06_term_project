@@ -1,0 +1,8 @@
+{
+    "bert_imdb_word": {
+        "attack_type": "word",
+        "attack_success_rate": 93.89999999999999,
+        "num_examples": 1000,
+        "successful_attacks": 939
+    }
+}

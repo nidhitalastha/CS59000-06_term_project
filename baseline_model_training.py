@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.nn import functional as F
 from torch.optim import AdamW
-from transformers import DistilBertForSequenceClassification, get_linear_schedule_with_warmup
+from transformers import DistilBertForSequenceClassification, BertForSequenceClassification, get_linear_schedule_with_warmup
 from sklearn.metrics import classification_report, accuracy_score, precision_recall_fscore_support, confusion_matrix
 import time
 import numpy as np
@@ -21,7 +21,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device for model training: {device}")
 
 
-def train_bert_model(train_dataloader, val_dataloader, num_labels=2, epochs=4):
+def train_bert_model(model_type, train_dataloader, val_dataloader, num_labels=2, epochs=4):
     """
     Train a BERT model for sequence classification.
     Args:
@@ -38,11 +38,21 @@ def train_bert_model(train_dataloader, val_dataloader, num_labels=2, epochs=4):
         print(f"Memory allocated: {torch.cuda.memory_allocated(0) / 1e9:.2f} GB")
         print(f"Memory cached: {torch.cuda.memory_reserved(0) / 1e9:.2f} GB")
     
-    # Load pre-trained BERT model
-    model = DistilBertForSequenceClassification.from_pretrained(
-        'distilbert-base-uncased',
-        num_labels=num_labels
-    )
+    if model_type == "bert":
+        # Load pre-trained BERT model
+        model = BertForSequenceClassification.from_pretrained(
+            'distilbert-base-uncased',
+            num_labels=num_labels
+        )
+    elif model_type == "distil":
+        # Load pre-trained BERT model
+        model = DistilBertForSequenceClassification.from_pretrained(
+            'distilbert-base-uncased',
+            num_labels=num_labels
+        )
+    else:
+        print("Please choose a model to train.....")
+
     model.to(device)
     
     # Define optimizer and scheduler
@@ -135,11 +145,18 @@ def train_bert_model(train_dataloader, val_dataloader, num_labels=2, epochs=4):
         print("\nClassification Report:")
         print(classification_report(all_labels, all_preds))
         
-        # Save checkpoint after each epoch
-        checkpoint_dir = "checkpoints"
-        os.makedirs(checkpoint_dir, exist_ok=True)
-        torch.save(model.state_dict(), f"{checkpoint_dir}/bert_epoch_{epoch+1}.pt")
-        print(f"Checkpoint saved to {checkpoint_dir}/bert_epoch_{epoch+1}.pt")
+        if model_type == "bert":
+            # Save checkpoint after each epoch
+            checkpoint_dir = "checkpoints"
+            os.makedirs(checkpoint_dir, exist_ok=True)
+            torch.save(model.state_dict(), f"{checkpoint_dir}/bert_epoch_{epoch+1}.pt")
+            print(f"Checkpoint saved to {checkpoint_dir}/bert_epoch_{epoch+1}.pt")
+        elif model_type == "distil":
+            # Save checkpoint after each epoch
+            checkpoint_dir = "checkpoints"
+            os.makedirs(checkpoint_dir, exist_ok=True)
+            torch.save(model.state_dict(), f"{checkpoint_dir}/distilbert_epoch_{epoch+1}.pt")
+            print(f"Checkpoint saved to {checkpoint_dir}/distilbert_epoch_{epoch+1}.pt")
     
     return model
 
@@ -264,12 +281,22 @@ def test_model_training():
         batch_size=8
     )
     
-    # Initialize tiny BERT model
-    model = DistilBertForSequenceClassification.from_pretrained(
-        'distilbert-base-uncased',
-        num_labels=2,
-        hidden_dropout_prob=0.1
-    )
+    if model_type == "bert":
+        # Initialize tiny BERT model
+        model = DistilBertForSequenceClassification.from_pretrained(
+            'distilbert-base-uncased',
+            num_labels=2,
+            hidden_dropout_prob=0.1
+        )
+    elif model_type == "distil":
+        # Initialize tiny BERT model
+        model = DistilBertForSequenceClassification.from_pretrained(
+            'distilbert-base-uncased',
+            num_labels=2,
+            hidden_dropout_prob=0.1
+        )
+    else: 
+        print("please choose a model to test......")
     
     # Train for 1 mini-epoch
     model.to(device)
@@ -315,4 +342,4 @@ def test_model_training():
 
 if __name__ == "__main__":
     # Run tests if this file is executed directly
-    test_model_training()
+    test_model_training(model_type="bert")

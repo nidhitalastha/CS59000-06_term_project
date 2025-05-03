@@ -60,18 +60,6 @@ try:
         print("Warning: visualization_scripts.py not found. Visualization functionality will be disabled.")
         visualizations_available = False
 
-    # Import defense functions (if available)
-    try:
-        from defense_mechanisms import (
-            adversarial_training, implement_input_sanitization,
-            test_sanitization_defense, robust_word_embeddings_defense,
-            ensemble_defense, save_defense_results
-        )
-        defenses_available = True
-    except ImportError:
-        print("Warning: defense_mechanisms.py not found. Defense functionality will be disabled.")
-        defenses_available = False
-
 except ImportError as e:
     print(f"Error importing project modules: {e}")
     print("Please make sure all required modules are in the same directory as main.py")
@@ -80,7 +68,7 @@ except ImportError as e:
 
 # Import transformers for BERT
 try:
-    from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
+    from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, BertTokenizer, BertForSequenceClassification
 except ImportError:
     print("Error: transformers library not found. Please install it with 'pip install transformers'")
     sys.exit(1)
@@ -96,10 +84,10 @@ def parse_args():
         "train_models", "run_attacks", "apply_defenses", "visualize_results", "full_pipeline"
     ], help="Task to perform")
     
-    parser.add_argument("--dataset", type=str, default="imdb", choices=["imdb", "jigsaw", "both"],
+    parser.add_argument("--dataset", type=str, default="imdb", choices=["imdb"],
                         help="Dataset to use")
     
-    parser.add_argument("--model_type", type=str, default="bert", choices=["bert"],
+    parser.add_argument("--model_type", type=str, default="bert", choices=["bert", "distil"],
                         help="Type of model to train/attack")
     
     parser.add_argument("--checkpoint_path", type=str, default=None,
@@ -108,10 +96,6 @@ def parse_args():
     parser.add_argument("--attack_type", type=str, default="word", 
                         choices=["char", "word", "homoglyph", "textfooler", "deepwordbug", "bert-attack", "all"],
                         help="Type of adversarial attack to perform")
-    
-    parser.add_argument("--defense_type", type=str, default="adversarial_training",
-                        choices=["adversarial_training", "input_sanitization", "robust_embeddings", "ensemble", "all"],
-                        help="Type of defense mechanism to apply")
     
     parser.add_argument("--num_examples", type=int, default=1000,
                         help="Number of examples to use for adversarial attacks")
@@ -188,15 +172,10 @@ def train_baseline_models(config):
     
     # Load datasets
     try:
-        if config["dataset"] in ["imdb", "both"]:
+        if config["dataset"] in ["imdb"]:
             print("\nLoading IMDB dataset...")
             imdb_train, imdb_test = load_imdb_dataset()
             datasets.append(("imdb", imdb_train, imdb_test))
-        
-        if config["dataset"] in ["jigsaw", "both"]:
-            print("\nLoading Jigsaw dataset...")
-            jigsaw_train, jigsaw_test = load_jigsaw_dataset()
-            datasets.append(("jigsaw", jigsaw_train, jigsaw_test))
         
         if not datasets:
             print("No datasets were loaded. Please check your dataset configuration.")
@@ -220,15 +199,22 @@ def train_baseline_models(config):
             train_data = train_data[:20000]
             test_data = test_data[:10000]
         
-        if config["model_type"] in ["bert", "all"]:
+        if config["model_type"] in ["bert", "distil", "all"]:
             try:
                 print("\nTraining BERT model")
                 
                 # Initialize tokenizer
-                tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+                if config["model_type"] == "bert":
+                    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+                elif config["model_type"] == "distil":
+                    tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+                else:
+                    print("Please provide a model to train.")
+
+
                 
                 # Prepare data for BERT
-                print("Preparing data for BERT...")
+                print("Preparing data for" + config[model_type] + "...")
                 max_seq_length = config.get("max_seq_length", 128)
                 train_encoded_inputs, train_labels = prepare_data_for_bert(train_data, tokenizer, max_seq_length=max_seq_length)
                 test_encoded_inputs, test_labels = prepare_data_for_bert(test_data, tokenizer, max_seq_length=max_seq_length)
@@ -252,7 +238,7 @@ def train_baseline_models(config):
                 
                 # Train BERT model
                 print(f"Training BERT model for {config['epochs']} epochs...")
-                bert_model = train_bert_model(train_dataloader, val_dataloader, epochs=config["epochs"])
+                bert_model = train_bert_model(config["model_type"], train_dataloader, val_dataloader, epochs=config["epochs"])
                 
                 # Save the model
                 model_path = f"{experiment_dir}/models/bert_{dataset_name}"
@@ -268,32 +254,34 @@ def train_baseline_models(config):
                 print(f"Test accuracy: {bert_metrics['accuracy']:.4f}")
                 print(f"Test F1 score: {bert_metrics['f1']:.4f}")
                 
-                # Save results
-                save_model_results("bert", dataset_name, bert_metrics, save_dir=f"{experiment_dir}/results")
+                if config["model_type"] == "bert":
+                    # Save results
+                    save_model_results("bert", dataset_name, bert_metrics, save_dir=f"{experiment_dir}/results")
+                    
+                    # Store model and metrics
+                    model_results[f"bert_{dataset_name}"] = {
+                        "model": bert_model,
+                        "tokenizer": tokenizer,
+                        "metrics": bert_metrics,
+                        "test_data": test_data
+                    }
+                elif config["model_type"] == "distil":
+                    # Save results
+                    save_model_results("distilbert", dataset_name, bert_metrics, save_dir=f"{experiment_dir}/results")
+                    
+                    # Store model and metrics
+                    model_results[f"distilbert_{dataset_name}"] = {
+                        "model": bert_model,
+                        "tokenizer": tokenizer,
+                        "metrics": bert_metrics,
+                        "test_data": test_data
+                    }
                 
-                # Store model and metrics
-                model_results[f"bert_{dataset_name}"] = {
-                    "model": bert_model,
-                    "tokenizer": tokenizer,
-                    "metrics": bert_metrics,
-                    "test_data": test_data
-                }
-                
-                print(f"BERT model for {dataset_name} completed successfully")
+                print(f"{config["model_type"]} model for {dataset_name} completed successfully")
                 
             except Exception as e:
                 print(f"Error training BERT model for {dataset_name}: {e}")
                 traceback.print_exc()
-        
-        # Add LSTM training if implemented and selected
-        if config["model_type"] in ["lstm", "all"]:
-            print("\nLSTM training will be implemented in a future update")
-            # You would add LSTM training code here
-        
-        # Add CNN training if implemented and selected
-        if config["model_type"] in ["cnn", "all"]:
-            print("\nCNN training will be implemented in a future update")
-            # You would add CNN training code here
     
     print("\n" + "="*50)
     print(f"BASELINE MODEL TRAINING COMPLETED: {len(model_results)} models trained")
@@ -327,7 +315,7 @@ def run_adversarial_attacks(model_results, config):
         print(f"\nRunning adversarial attacks on {model_name} for {dataset_name} dataset")
         
         if config["attack_type"] == "all":
-            attack_types = ["char", "word", "homoglyph", "textfooler"]
+            attack_types = ["char", "word", "homoglyph", "deepwordbug"]
         else:
             attack_types = [config["attack_type"]]
         
@@ -423,29 +411,6 @@ def visualize_all_results(experiment_dir):
             print("Perturbation impact visualization completed")
         else:
             print("No example files found")
-        
-        # Visualize defense effectiveness
-        print("\nVisualizing defense effectiveness...")
-        defense_files = glob.glob(f"{experiment_dir}/results/*_defense.csv")
-        if defense_files:
-            defense_df = pd.concat([pd.read_csv(file) for file in defense_files])
-            
-            plt.figure(figsize=(12, 8))
-            sns.barplot(
-                x='attack_type',
-                y='improvement',
-                hue='defense_type',
-                data=defense_df
-            )
-            plt.title('Defense Effectiveness by Attack Type', fontsize=16)
-            plt.xlabel('Attack Type', fontsize=14)
-            plt.ylabel('Improvement (% Reduction in Attack Success Rate)', fontsize=14)
-            plt.tight_layout()
-            plt.savefig(f"{experiment_dir}/visualizations/defense_effectiveness.png")
-            plt.close()
-            print("Defense effectiveness visualization completed")
-        else:
-            print("No defense files found")
     
     except Exception as e:
         print(f"Error generating visualizations: {e}")
@@ -512,17 +477,26 @@ def main():
             print(f"Error in model training: {e}")
             traceback.print_exc()
     
-    elif config["task"] in ["run_attacks", "apply_defenses", "visualize_results"]:
+    elif config["task"] in ["run_attacks", "visualize_results"]:
         # Load previously trained models
         try:
             if config.get("checkpoint_path"):
                 print(f"Loading model from checkpoint: {config['checkpoint_path']}")
-                # Load base model
-                model = DistilBertForSequenceClassification.from_pretrained(f"{training_experiment_dir}/models/bert_imdb", num_labels=2)
+
+                if config["model_type"] == "bert":
+                    # Load base model
+                    model = BertForSequenceClassification.from_pretrained(f"{training_experiment_dir}/models/bert_imdb", num_labels=2)
+                    # Load tokenizer
+                    tokenizer = BertTokenizer.from_pretrained(f"{training_experiment_dir}/models/bert_imdb")
+                elif config["model_type"] == "distil":
+                    # Load base model
+                    model = DistilBertForSequenceClassification.from_pretrained(f"{training_experiment_dir}/models/distil_imdb", num_labels=2)
+                    # Load tokenizer
+                    tokenizer = DistilBertTokenizer.from_pretrained(f"{training_experiment_dir}/models/distil_imdb")
+
                 # Load checkpoint
                 model.load_state_dict(torch.load(config['checkpoint_path'], map_location=device))
-                # Load tokenizer
-                tokenizer = DistilBertTokenizer.from_pretrained(f"{training_experiment_dir}/models/bert_imdb")
+                
                 # Load test data
                 _, test_data = load_imdb_dataset()
                 
